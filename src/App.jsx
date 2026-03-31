@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { SearchProvider } from './SearchContext.jsx'
 import { SearchPage } from './pages/SearchPage.jsx'
@@ -18,7 +18,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <SearchProvider>
         <div className="app app--dashboard">
           <button
@@ -39,6 +39,6 @@ export default function App() {
           </Routes>
         </div>
       </SearchProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
