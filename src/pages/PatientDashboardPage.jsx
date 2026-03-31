@@ -180,9 +180,25 @@ function transformTemperatureObservations(bundle) {
   return transformSimpleObservationSeries(bundle, {
     seriesKey: 'temperature',
     getDate: (resource) => resource?.effectiveDateTime ?? null,
-    getUnit: (resource) => {
+    getUnit: () => '°F',
+    normalizeValue: (value, resource) => {
       const unitRaw = resource?.valueQuantity?.unit
-      return unitRaw && String(unitRaw).trim() ? String(unitRaw).trim() : null
+      const unit = unitRaw && String(unitRaw).trim() ? String(unitRaw).trim().toLowerCase() : ''
+      const code = resource?.valueQuantity?.code && String(resource.valueQuantity.code).trim()
+        ? String(resource.valueQuantity.code).trim().toLowerCase()
+        : ''
+      const system = resource?.valueQuantity?.system && String(resource.valueQuantity.system).trim()
+        ? String(resource.valueQuantity.system).trim().toLowerCase()
+        : ''
+      const isCelsius =
+        unit === 'c' ||
+        unit === '°c' ||
+        unit === 'degc' ||
+        unit === 'celsius' ||
+        code === 'cel' ||
+        code === 'degc' ||
+        (system === 'http://unitsofmeasure.org' && code === 'cel')
+      return isCelsius ? (value * 9) / 5 + 32 : value
     },
   })
 }
