@@ -171,7 +171,14 @@ function transformHeartRateObservations(bundle) {
     getDate: (resource) => resource?.effectiveDateTime ?? null,
     getUnit: (resource) => {
       const unitRaw = resource?.valueQuantity?.unit
-      return unitRaw && String(unitRaw).trim() ? String(unitRaw).trim() : 'bpm'
+      const unit = unitRaw && String(unitRaw).trim() ? String(unitRaw).trim() : ''
+      const codeRaw = resource?.valueQuantity?.code
+      const code = codeRaw && String(codeRaw).trim() ? String(codeRaw).trim() : ''
+      const normalized = `${unit} ${code}`.toLowerCase()
+      if (normalized.includes('beats') || normalized.includes('/min') || normalized.includes('{beats}/min')) {
+        return 'bpm'
+      }
+      return unit || 'bpm'
     },
   })
 }
@@ -194,11 +201,26 @@ function transformTemperatureObservations(bundle) {
         unit === 'c' ||
         unit === '°c' ||
         unit === 'degc' ||
+        unit === '℃' ||
         unit === 'celsius' ||
         code === 'cel' ||
         code === 'degc' ||
-        (system === 'http://unitsofmeasure.org' && code === 'cel')
-      return isCelsius ? (value * 9) / 5 + 32 : value
+        code === '[degc]' ||
+        (system === 'http://unitsofmeasure.org' && (code === 'cel' || code === '[degc]'))
+      const isFahrenheit =
+        unit === 'f' ||
+        unit === '°f' ||
+        unit === 'degf' ||
+        unit === '℉' ||
+        unit === 'fahrenheit' ||
+        code === '[degf]' ||
+        code === 'degf' ||
+        (system === 'http://unitsofmeasure.org' && code === '[degf]')
+      if (isCelsius) return (value * 9) / 5 + 32
+      if (isFahrenheit) return value
+      // Fallback: if unit metadata is missing and value looks like body temp in C, convert.
+      if (value >= 30 && value <= 45) return (value * 9) / 5 + 32
+      return value
     },
   })
 }
