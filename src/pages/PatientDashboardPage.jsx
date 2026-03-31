@@ -1077,7 +1077,14 @@ export function PatientDashboardPage() {
                     <LineChart data={temperatureData} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis dataKey="temperature" />
+                      <YAxis
+                        dataKey="temperature"
+                        domain={[
+                          (dataMin) => Math.floor(Number(dataMin) - 1),
+                          (dataMax) => Math.ceil(Number(dataMax) + 1),
+                        ]}
+                        tickFormatter={(value) => Number(value).toFixed(1)}
+                      />
                       <Tooltip
                         formatter={(value, _name, props) => {
                           const numeric = Number(value)
